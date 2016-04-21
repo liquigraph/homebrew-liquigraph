@@ -9,14 +9,32 @@ class Liquigraph < Formula
   depends_on :java => "1.7+"
 
   def install
+    ENV.java_cache
     system "mvn", "-q", "clean", "package", "-DskipTests"
     mkdir "binaries"
     system "tar", "xzf", "liquigraph-cli/target/liquigraph-cli-bin.tar.gz", "-C", "binaries"
-    mv "binaries/liquigraph-cli/liquigraph.sh", "binaries/liquigraph-cli/liquigraph"
-    bin.install "binaries/liquigraph-cli/liquigraph", "binaries/liquigraph-cli/liquigraph-cli.jar"
+    libexec.install "binaries/liquigraph-cli/liquigraph.sh" => "liquigraph"
+    libexec.install "binaries/liquigraph-cli/liquigraph-cli.jar"
+    bin.install_symlink libexec/"liquigraph"
   end
 
   test do
-    system "liquigraph", "-h"
+    failing_hostname = "verrryyyy_unlikely_host"
+    changelog = (testpath/"changelog")
+    changelog.write <<-EOS.undent
+<?xml version="1.0" encoding="UTF-8"?>
+<changelog>
+    <changeset id="hello-world" author="you">
+        <query>CREATE (n:Sentence {text:'Hello monde!'}) RETURN n</query>
+    </changeset>
+    <changeset id="hello-world-fixed" author="you">
+        <query>MATCH (n:Sentence {text:'Hello monde!'}) SET n.text='Hello world!' RETURN n</query>
+    </changeset>
+</changelog>
+EOS
+    assert_match(
+      /UnknownHostException: #{failing_hostname}/,
+      shell_output("#{bin}/liquigraph -c #{changelog.realpath} -g jdbc:neo4j://#{failing_hostname}:7474/ 2>&1", 1)
+    )
   end
 end
