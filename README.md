@@ -1,4 +1,4 @@
-# Homebrew recipe for Liquigraph
+# Homebrew recipe for [Liquigraph](https://github.com/fbiville/liquigraph)
 
 ```shell
 # install
