@@ -11,7 +11,7 @@ class Liquigraph < Formula
   def install
     ENV.java_cache
     system "mvn", "-q", "clean", "package", "-DskipTests"
-    mkdir "binaries"
+    (buildpath/"binaries").mkpath
     system "tar", "xzf", "liquigraph-cli/target/liquigraph-cli-bin.tar.gz", "-C", "binaries"
     libexec.install "binaries/liquigraph-cli/liquigraph.sh" => "liquigraph"
     libexec.install "binaries/liquigraph-cli/liquigraph-cli.jar"
