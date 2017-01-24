@@ -1,9 +1,9 @@
 class Liquigraph < Formula
   desc "Migration runner for Neo4j"
-  homepage "http://www.liquigraph.org"
-  url "https://github.com/fbiville/liquigraph/archive/liquigraph-3.0.0.tar.gz"
+  homepage "https://liquigraph.github.io"
+  url "https://github.com/liquigraph/liquigraph/archive/liquigraph-3.0.0.tar.gz"
   sha256 "4864c323a626c15df9fed49d05ede3e947e0b78fe864ff81dcc8703b875662b1"
-  head "https://github.com/fbiville/liquigraph.git"
+  head "https://github.com/liquigraph/liquigraph.git"
 
   depends_on "maven" => :build
   depends_on :java => "1.8+"

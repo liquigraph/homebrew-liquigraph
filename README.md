@@ -2,7 +2,7 @@
 
 ```shell
 # install
- $> brew tap 'fbiville/liquigraph'
+ $> brew tap 'liquigraph/liquigraph'
  $> brew install liquigraph
 # enjoy
  $> liquigraph -h
