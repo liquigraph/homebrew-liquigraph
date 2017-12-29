@@ -1,27 +1,28 @@
 class Liquigraph < Formula
   desc "Migration runner for Neo4j"
-  homepage "https://liquigraph.github.io"
-  url "https://github.com/liquigraph/liquigraph/archive/liquigraph-3.0.0.tar.gz"
-  sha256 "4864c323a626c15df9fed49d05ede3e947e0b78fe864ff81dcc8703b875662b1"
+  homepage "http://www.liquigraph.org"
+  url "https://github.com/liquigraph/liquigraph/archive/liquigraph-3.0.2.tar.gz"
+  sha256 "99a4eaf26834de5be45665aa7fda4f666e2f75c48cac47da33e173111b5be352"
   head "https://github.com/liquigraph/liquigraph.git"
 
   depends_on "maven" => :build
-  depends_on :java => "1.8+"
+  depends_on :java => "1.8"
 
   def install
-    ENV.java_cache
-    system "mvn", "-q", "clean", "package", "-DskipTests"
+    cmd = Language::Java.java_home_cmd("1.8")
+    ENV["JAVA_HOME"] = Utils.popen_read(cmd).chomp
+    system "mvn", "-B", "-q", "-am", "-pl", "liquigraph-cli", "clean", "package", "-DskipTests"
     (buildpath/"binaries").mkpath
     system "tar", "xzf", "liquigraph-cli/target/liquigraph-cli-bin.tar.gz", "-C", "binaries"
-    libexec.install "binaries/liquigraph-cli/liquigraph.sh" => "liquigraph"
+    libexec.install "binaries/liquigraph-cli/liquigraph.sh"
     libexec.install "binaries/liquigraph-cli/liquigraph-cli.jar"
-    bin.install_symlink libexec/"liquigraph"
+    (bin/"liquigraph").write_env_script libexec/"liquigraph.sh", Language::Java.java_home_env("1.8")
   end
 
   test do
     failing_hostname = "verrryyyy_unlikely_host"
-    changelog = (testpath/"changelog")
-    changelog.write <<-EOS.undent
+    changelog = testpath/"changelog"
+    changelog.write <<~EOS
       <?xml version="1.0" encoding="UTF-8"?>
       <changelog>
           <changeset id="hello-world" author="you">
@@ -31,8 +32,10 @@ class Liquigraph < Formula
               <query>MATCH (n:Sentence {text:'Hello monde!'}) SET n.text='Hello world!' RETURN n</query>
           </changeset>
       </changelog>
-      EOS
-    assert_match(/UnknownHostException: #{failing_hostname}/,
-      shell_output("#{bin}/liquigraph -c #{changelog.realpath} -g jdbc:neo4j:http://#{failing_hostname}:7474/ 2>&1", 1))
+    EOS
+
+    jdbc = "jdbc:neo4j:http://#{failing_hostname}:7474/"
+    output = shell_output("#{bin}/liquigraph -c #{changelog.realpath} -g #{jdbc} 2>&1", 1)
+    assert_match "UnknownHostException: #{failing_hostname}", output
   end
 end
