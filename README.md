@@ -10,3 +10,7 @@ You can just run `brew install liquigraph` instead of the following instructions
 # enjoy
  $> liquigraph -h
 ```
+
+# Issues
+
+Please report any issue in https://github.com/liquigraph/liquigraph/.
